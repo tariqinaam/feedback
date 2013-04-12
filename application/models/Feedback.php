@@ -15,7 +15,8 @@ return $countries;
 
     
 }
-public function getAnswers($questionId){
+public function getAnswers($answer){
+    
        
 }
 

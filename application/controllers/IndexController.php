@@ -1,66 +1,79 @@
 <?php
 
-class IndexController extends Zend_Controller_Action {
+class IndexController extends Zend_Controller_Action
+{
 
-    public function init() {
+    public function init()
+    {
         /* Initialize action controller here */
     }
 
-    public function indexAction() {
-        
+    public function indexAction()
+    {
 
         // action body
+        $users = new Application_Model_Users();
+        $user_answer = new Application_Model_UserAnswer();
         $form = new Application_Form_Feedback();
         $this->view->form = $form;
-        
+
         $questionModel = new Application_Model_Question();
-        $question = $questionModel->fetchAll($where='isActive=1');
+        $question = $questionModel->fetchAll($where = 'questionType=0');
+
         $indexmodel = new Application_Model_Feedback;
-        
-        foreach ($question as $key ) {
-          $questionid =  $key['Id'];
-         }
-         
-         $answers = $indexmodel->fetchAll($where='questionId=1');
-            foreach ($answers as $key) {
-            $form->getElement('skills')
-                    ->addMultiOptions(array($key['Id'] => $key['answer']));
+
+        foreach ($question as $key) {
+            $questionid = $key['Id'];
+
+            $answers = $indexmodel->fetchAll($where = 'questionId=' . $questionid);
+            foreach ($answers as $key1) {
+                $form->getElement($key['questionType'] . '' . $key['Id'])
+                        ->addMultiOptions(array($key1['Id'] => $key1['answer']));
+            }
         }
-        
-        $answers1 = $indexmodel->fetchAll($where='questionId=2');
-            foreach ($answers1 as $key) {
-            $form->getElement('satisfaction')
-                    ->addMultiOptions(array($key['Id'] => $key['answer']));
-        }
-        
-        
-        $answers = $indexmodel->fetchAll($where='questionId=3');
-            foreach ($answers as $key) {
-            $form->getElement('expectation')
-                    ->addMultiOptions(array($key['Id'] => $key['answer']));
-        }
-        
-         $answers = $indexmodel->fetchAll($where='questionId=4');
-            foreach ($answers as $key) {
-            $form->getElement('presentation')
-                    ->addMultiOptions(array($key['Id'] => $key['answer']));
-        }
-        
-         
-       
+
         $result = $indexmodel->getCountries();
         foreach ($result as $key => $value) {
             $form->getElement('country')
                     ->addMultiOptions(array($key => $value));
         }
-        
-        
-        
-
 
         if ($this->getRequest()->isPost()) {
             if ($this->view->form->isValid($_POST)) {
                 // process data here
+
+
+                $email = $form->getValue('email');
+                if ($users->checkUnique($email)) {
+                    $this->view->errorMessage = "you have already completed survey. Thank you.";
+                    return;
+                }
+
+                $userData = array(
+                    'fname' => $form->getValue("fname"),
+                    'lname' => $form->getValue('lname'),
+                    'email' => $form->getValue('email'),
+                    'address' => $form->getValue('address'),
+                    'address1' => $form->getValue('address1'),
+                    'country' => $form->getValue('country')
+                );
+
+                $users->insert($userData);
+
+                $id = $users->getId($email);
+
+
+
+                foreach ($question as $key) {
+                    echo $questionid = $key['Id'];
+                    $x = array('userId' => $id, 'questionId' => $questionid, 'answerId' => $form->getValue('0' . $questionid));
+                    vdump($x);
+                    $user_answer->insertdata($x);
+                }
+               $this->_helper->flashMessenger->addMessage('thank you for your feedback.');
+
+                $this->_helper->redirector('thanks');
+                // vdump($surveyData);exit;
             } else {
                 $this->view->errormessage = "errors on form, please check";
                 $this->view->form->populate($_POST);
@@ -68,5 +81,21 @@ class IndexController extends Zend_Controller_Action {
         }
     }
 
+    public function thanksAction()
+    {
+        // action body
+        $this->_flashMessenger = $this->_helper->getHelper('FlashMessenger');
+$this->view->messages = $this->_flashMessenger->getMessages();
+    }
+
+
 }
 
+
+/*'lname' => $form->getValue('lname'), 
+                    'email' => $form->getValue('email'), 
+                    'address' => $form->getValue('address'),
+                    'address1' => $form->getValue('address1'),
+                    'country' =>$form->getValue('country')
+ * 
+ */

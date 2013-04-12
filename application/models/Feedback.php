@@ -16,10 +16,9 @@ return $countries;
     
 }
 public function getAnswers($questionId){
-    
-    
-    
-    
+       
 }
+
+
 }
 

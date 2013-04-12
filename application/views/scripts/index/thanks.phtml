@@ -1,18 +1,21 @@
 <?php ?>
-<?php if (count($this->messages)) : ?>
 
-<ul id="messages">
+<div class="span9">
+    <div class="leaderboard">
 
-<?php foreach ($this->messages as $message) : ?>
+        <?php if (count($this->messages)) : ?>
 
-    <li><?php echo $this->escape($message); ?></li>
+            <ul id="messages" style="list-style: none;">
 
-<?php endforeach; ?>
+                <?php foreach ($this->messages as $message) : ?>
 
-</ul>
+                    <li><?php echo $this->escape($message); ?></li>
 
-<?php endif; ?>
-<br /><br />
-<div id="view-content">
-	<p>View script for controller <b>Index</b> and script/action name <b>thanks</b></p>
+                <?php endforeach; ?>
+
+            </ul>
+
+        <?php endif; ?>
+
+    </div>
 </div>
